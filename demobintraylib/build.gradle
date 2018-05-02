@@ -1,4 +1,96 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+install {
+    repositories.mavenInstaller {
+        pom.project {
+            name MODULE_NAME
+            description 'first training bintray desc'
+
+            packaging ARTIFACT_TYPE
+            groupId PACKAGE_NAME // compile 'tech.thdev:
+            artifactId MODULE_NAME // :bintray-sample:
+            version TOAST_IAP_SDK_VERSION // :0.0.1-alpha
+
+            licenses {
+                license {
+                    name 'The Apache Software License, Version 2.0'
+                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                }
+            }
+            developers {
+                developer {
+                    id 'milkybboy@gmail.com'
+                    name 'jinsang'
+                    email 'milkybboy@gmail.com'
+                }
+            }
+//            scm {
+//                connection gitUrl
+//                developerConnection gitUrl
+//                    url siteUrl
+//            }
+        }
+        pom.whenConfigured { pom ->
+            pom.dependencies.forEach { dep ->
+                if (dep.getVersion() == "unspecified") {
+                    dep.setGroupId(PACKAGE_NAME)
+                    dep.setVersion(TOAST_IAP_SDK_VERSION)
+                }
+            }
+        }
+    }
+}
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('bintray.properties').newDataInputStream())
+
+bintray {
+    user = properties.getProperty("bintray.ossUser")
+    key = properties.getProperty("bintray.apiKey")
+    pkg {
+        repo = properties.getProperty("bintray.repoName") // Repository name (Created in the repository Bintray site), maven
+        name = MODULE_NAME // module name
+        userOrg = 'jinsangnet'
+        desc = 'Bintray sample library'
+        licenses = ['Apache-2.0']
+//        vcsUrl = gitUrl
+
+        version {
+            name = TOAST_IAP_SDK_VERSION // The name of your library project
+            desc = 'Gradle Bintray sample' // Optional - Version-specific description'
+            released  = new Date() // Optional - Date of the version release. 2 possible values: date in the format of 'yyyy-MM-dd'T'HH:mm:ss.SSSZZ' OR a java.util.Date instance
+            vcsTag = TOAST_IAP_SDK_VERSION
+        }
+    }
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+// Optional docs
+//task javadoc(type: Javadoc) {
+//    source = android.sourceSets.main.java.srcDirs
+//    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+//}
+
+// Optional javadoc
+//task javadocJar(type: Jar, dependsOn: javadoc) {
+//    classifier = 'javadoc'
+//    from javadoc.destinationDir
+//}
+
+artifacts {
+//    archives javadocJar // Optional
+    archives sourcesJar
+}
+
+task findConventions << {
+    println project.getConvention()
+}
 
 android {
     compileSdkVersion 27
