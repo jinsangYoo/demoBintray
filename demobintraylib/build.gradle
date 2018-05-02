@@ -2,11 +2,16 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
+group = PACKAGE_NAME
+version = TOAST_IAP_SDK_VERSION
+
 install {
     repositories.mavenInstaller {
         pom.project {
             name MODULE_NAME
             description 'first training bintray desc'
+            url 'https://github.com/milkybboy/demoBintray.git'
+            inceptionYear '2018'
 
             packaging ARTIFACT_TYPE
             groupId PACKAGE_NAME // compile 'tech.thdev:
@@ -19,19 +24,16 @@ install {
                     url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                 }
             }
+
             developers {
                 developer {
-                    id 'milkybboy@gmail.com'
+                    id 'jinsang'
                     name 'jinsang'
                     email 'milkybboy@gmail.com'
                 }
             }
-//            scm {
-//                connection gitUrl
-//                developerConnection gitUrl
-//                    url siteUrl
-//            }
         }
+
         pom.whenConfigured { pom ->
             pom.dependencies.forEach { dep ->
                 if (dep.getVersion() == "unspecified") {
@@ -49,47 +51,29 @@ properties.load(project.rootProject.file('bintray.properties').newDataInputStrea
 bintray {
     user = properties.getProperty("bintray.ossUser")
     key = properties.getProperty("bintray.apiKey")
+
+    configurations = ['archives']
+
     pkg {
         repo = properties.getProperty("bintray.repoName") // Repository name (Created in the repository Bintray site), maven
         name = MODULE_NAME // module name
         userOrg = 'jinsangnet'
         desc = 'Bintray sample library'
         licenses = ['Apache-2.0']
-//        vcsUrl = gitUrl
+        vcsUrl = 'https://github.com/milkybboy/demoBintray.git'
+        labels = ['android', 'jinsang']
+
+        publish = true
+        publicDownloadNumbers = true
 
         version {
             name = TOAST_IAP_SDK_VERSION // The name of your library project
             desc = 'Gradle Bintray sample' // Optional - Version-specific description'
             released  = new Date() // Optional - Date of the version release. 2 possible values: date in the format of 'yyyy-MM-dd'T'HH:mm:ss.SSSZZ' OR a java.util.Date instance
             vcsTag = TOAST_IAP_SDK_VERSION
+            attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin']
         }
     }
-}
-
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
-}
-
-// Optional docs
-//task javadoc(type: Javadoc) {
-//    source = android.sourceSets.main.java.srcDirs
-//    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-//}
-
-// Optional javadoc
-//task javadocJar(type: Jar, dependsOn: javadoc) {
-//    classifier = 'javadoc'
-//    from javadoc.destinationDir
-//}
-
-artifacts {
-//    archives javadocJar // Optional
-    archives sourcesJar
-}
-
-task findConventions << {
-    println project.getConvention()
 }
 
 android {
@@ -101,7 +85,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 27
         versionCode 1
-        versionName "1.0"
+        versionName TOAST_IAP_SDK_VERSION
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -123,4 +107,28 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar // Optional
+    archives sourcesJar
+}
+
+task findConventions << {
+    println project.getConvention()
 }
