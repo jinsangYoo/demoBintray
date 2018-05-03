@@ -27,9 +27,9 @@ install {
 
             developers {
                 developer {
-                    id 'jinsang'
-                    name 'jinsang'
-                    email 'milkybboy@gmail.com'
+                    id 'jinsang83'
+                    name 'jinsang83'
+                    email 'demojinsang@gmail.com'
                 }
             }
         }
@@ -57,13 +57,13 @@ bintray {
     pkg {
         repo = properties.getProperty("bintray.repoName") // Repository name (Created in the repository Bintray site), maven
         name = MODULE_NAME // module name
-        userOrg = 'jinsangnet'
+//        userOrg = 'jinsangcop'
         desc = 'Bintray sample library'
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/milkybboy/demoBintray.git'
         labels = ['android', 'jinsang']
 
-        publish = true
+        publish = false
         publicDownloadNumbers = true
 
         version {
