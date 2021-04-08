@@ -1,89 +1,243 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'com.jfrog.bintray'
+//apply plugin: 'com.jfrog.bintray'
 
-group = PACKAGE_NAME
-version = TOAST_IAP_SDK_VERSION
+apply plugin: 'maven-publish'
 
-install {
-    repositories.mavenInstaller {
-        pom.project {
-            name MODULE_NAME
-            description 'first training bintray desc'
-            url 'https://github.com/milkybboy/demoBintray.git'
-            inceptionYear '2018'
+// Because the components are created only during the afterEvaluate phase, you must
+// configure your publications using the afterEvaluate() lifecycle method.
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                pom {
+                    name = 'demojinsang Library'
+                    description = 'A concise description of demojinsang library'
+                    url = 'https://github.com/milkybboy/demoBintray.git'
+                    inceptionYear = '2018'
 
-            packaging ARTIFACT_TYPE
-            groupId PACKAGE_NAME // compile 'tech.thdev:
-            artifactId MODULE_NAME // :bintray-sample:
-            version TOAST_IAP_SDK_VERSION // :0.0.1-alpha
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'jinsang83'
+                            name = 'jinsang83'
+                            email = 'demojinsang@gmail.com'
+                            organization = 'home'
+                            organizationUrl = 'https://github.com/milkybboy/demoBintray.git'
+                        }
+                    }
 
-            licenses {
-                license {
-                    name 'The Apache Software License, Version 2.0'
-                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    scm {
+                        url = 'https://github.com/milkybboy/demoBintray.git'
+                    }
                 }
+
+                // You can then customize attributes of the publication as shown below.
+                groupId = PACKAGE_NAME
+                artifactId = MODULE_NAME
+                version = TOAST_IAP_SDK_VERSION
+
+                artifact(sourceJar)
+                artifact(javadocJar)
+                artifact("$buildDir/outputs/aar/$MODULE_NAME-release.aar")
             }
+            // Creates a Maven publication called “debug”.
+            debug(MavenPublication) {
+                // Applies the component for the debug build variant.
+                pom {
+                    name = 'demojinsang Library'
+                    description = 'A concise description of demojinsang library'
+                    url = 'https://github.com/milkybboy/demoBintray.git'
+                    inceptionYear = '2018'
 
-            developers {
-                developer {
-                    id 'jinsang83'
-                    name 'jinsang83'
-                    email 'demojinsang@gmail.com'
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'jinsang83'
+                            name = 'jinsang83'
+                            email = 'demojinsang@gmail.com'
+                            organization = 'home'
+                            organizationUrl = 'https://github.com/milkybboy/demoBintray.git'
+                        }
+                    }
+
+                    scm {
+                        url = 'https://github.com/milkybboy/demoBintray.git'
+                    }
                 }
+
+                groupId = PACKAGE_NAME
+                artifactId = "$MODULE_NAME-debug"
+                version = TOAST_IAP_SDK_VERSION
+
+                artifact(sourceJar)
+                artifact(javadocJar)
+                artifact("$buildDir/outputs/aar/$MODULE_NAME-debug.aar")
             }
         }
-
-        pom.whenConfigured { pom ->
-            pom.dependencies.forEach { dep ->
-                if (dep.getVersion() == "unspecified") {
-                    dep.setGroupId(PACKAGE_NAME)
-                    dep.setVersion(TOAST_IAP_SDK_VERSION)
-                }
+        repositories {
+            maven {
+                url "$buildDir/repo"
             }
         }
     }
 }
 
-Properties properties = new Properties()
-properties.load(project.rootProject.file('bintray.properties').newDataInputStream())
-
-bintray {
-    user = properties.getProperty("bintray.ossUser")
-    key = properties.getProperty("bintray.apiKey")
-
-    configurations = ['archives']
-
-    pkg {
-        repo = properties.getProperty("bintray.repoName") // Repository name (Created in the repository Bintray site), maven
-        name = MODULE_NAME // module name
-//        userOrg = 'jinsangcop'
-        desc = 'Bintray sample library'
-        licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/milkybboy/demoBintray.git'
-        labels = ['android', 'jinsang']
-
-        publish = false
-        publicDownloadNumbers = true
-
-        version {
-            name = TOAST_IAP_SDK_VERSION // The name of your library project
-            desc = 'Gradle Bintray sample' // Optional - Version-specific description'
-            released  = new Date() // Optional - Date of the version release. 2 possible values: date in the format of 'yyyy-MM-dd'T'HH:mm:ss.SSSZZ' OR a java.util.Date instance
-            vcsTag = TOAST_IAP_SDK_VERSION
-            attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin']
-        }
-    }
+task sourceJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier "sources"
 }
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+//publishing {
+//    publications {
+////        mavenJava(MavenPublication) {
+////            groupId PACKAGE_NAME
+////            artifactId MODULE_NAME
+////            version TOAST_IAP_SDK_VERSION
+////            artifact(sourceJar)
+////            artifact("$buildDir/outputs/aar/$MODULE_NAME-release.aar")
+////        }
+//        mavenJava(MavenPublication) {
+//            pom {
+//                name = 'demojinsang Library'
+//                description = 'A concise description of demojinsang library'
+//                url = 'https://github.com/milkybboy/demoBintray.git'
+//                inceptionYear = '2018'
+//
+//                licenses {
+//                    license {
+//                        name = 'The Apache License, Version 2.0'
+//                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+//                    }
+//                }
+//                developers {
+//                    developer {
+//                        id = 'jinsang83'
+//                        name = 'jinsang83'
+//                        email = 'demojinsang@gmail.com'
+//                    }
+//                }
+//
+//                scm {
+//                    url = 'https://github.com/milkybboy/demoBintray.git'
+//                }
+//
+//                groupId PACKAGE_NAME
+//                artifactId MODULE_NAME
+//                version TOAST_IAP_SDK_VERSION
+//                artifact(sourceJar)
+//                artifact("$buildDir/outputs/aar/$MODULE_NAME-release.aar")
+//            }
+//        }
+//    }
+//    repositories {
+//        maven {
+//            url "$buildDir/repo"
+//        }
+//    }
+//}
+
+//group = PACKAGE_NAME
+//version = TOAST_IAP_SDK_VERSION
+//
+//install {
+//    repositories.mavenInstaller {
+//        pom.project {
+//            name MODULE_NAME
+//            description 'first training bintray desc'
+//            url 'https://github.com/milkybboy/demoBintray.git'
+//            inceptionYear '2018'
+//
+//            packaging ARTIFACT_TYPE
+//            groupId PACKAGE_NAME // compile 'tech.thdev:
+//            artifactId MODULE_NAME // :bintray-sample:
+//            version TOAST_IAP_SDK_VERSION // :0.0.1-alpha
+//
+//            licenses {
+//                license {
+//                    name 'The Apache Software License, Version 2.0'
+//                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+//                }
+//            }
+//
+//            developers {
+//                developer {
+//                    id 'jinsang83'
+//                    name 'jinsang83'
+//                    email 'demojinsang@gmail.com'
+//                }
+//            }
+//        }
+//
+//        pom.whenConfigured { pom ->
+//            pom.dependencies.forEach { dep ->
+//                if (dep.getVersion() == "unspecified") {
+//                    dep.setGroupId(PACKAGE_NAME)
+//                    dep.setVersion(TOAST_IAP_SDK_VERSION)
+//                }
+//            }
+//        }
+//    }
+//}
+//
+//Properties properties = new Properties()
+//properties.load(project.rootProject.file('bintray.properties').newDataInputStream())
+
+//bintray {
+//    user = properties.getProperty("bintray.ossUser")
+//    key = properties.getProperty("bintray.apiKey")
+//
+//    configurations = ['archives']
+//
+//    pkg {
+//        repo = properties.getProperty("bintray.repoName") // Repository name (Created in the repository Bintray site), maven
+//        name = MODULE_NAME // module name
+////        userOrg = 'jinsangcop'
+//        desc = 'Bintray sample library'
+//        licenses = ['Apache-2.0']
+//        vcsUrl = 'https://github.com/milkybboy/demoBintray.git'
+//        labels = ['android', 'jinsang']
+//
+//        publish = false
+//        publicDownloadNumbers = true
+//
+//        version {
+//            name = TOAST_IAP_SDK_VERSION // The name of your library project
+//            desc = 'Gradle Bintray sample' // Optional - Version-specific description'
+//            released  = new Date() // Optional - Date of the version release. 2 possible values: date in the format of 'yyyy-MM-dd'T'HH:mm:ss.SSSZZ' OR a java.util.Date instance
+//            vcsTag = TOAST_IAP_SDK_VERSION
+//            attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin']
+//        }
+//    }
+//}
 
 android {
-    compileSdkVersion 27
-
-
+    compileSdkVersion 30
 
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion 27
+        targetSdkVersion 30
         versionCode 1
         versionName TOAST_IAP_SDK_VERSION
 
@@ -103,32 +257,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'com.android.support:appcompat-v7:27.1.1'
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.1'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-}
-
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
-}
-
-task javadoc(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives javadocJar // Optional
-    archives sourcesJar
-}
-
-task findConventions << {
-    println project.getConvention()
 }
